@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rate Board — Live Exchange Comparison</title>
+<title>Rate Board — ICONO EXCHANGE</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -85,8 +85,13 @@
   }
   .amount-input input:focus{outline:none;}
   .amount-input input::-webkit-outer-spin-button,
-  .amount-input input::-webkit-inner-spin-button{-webkit-appearance:none; margin:0;}
-  .amount-input input[type=number]{-moz-appearance:textfield;}
+  .amount-input input::-webkit-inner-spin-button{
+    -webkit-appearance:none;
+    margin:0;
+  }
+  .amount-input input[type=number]{
+    -moz-appearance:textfield;
+  }
   .amount-input span{color:var(--muted); font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:14px;}
 
   .readout{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;}
@@ -119,30 +124,6 @@
   .savings.negative{color:var(--warn); background:rgba(224,161,90,.08); border-color:rgba(224,161,90,.25);}
   .savings strong{font-family:'IBM Plex Mono', ui-monospace, monospace;}
 
-  details.rates-panel{margin-bottom:18px; border-top:1px dashed var(--frame); padding-top:14px;}
-  summary{
-    cursor:pointer; font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:12.5px;
-    color:var(--muted); list-style:none;
-  }
-  summary::-webkit-details-marker{display:none;}
-  summary::marker{content:'';}
-  summary:before{content:'▸ ';}
-  details[open] summary:before{content:'▾ ';}
-  summary:focus-visible{outline:2px solid var(--amber); outline-offset:2px;}
-
-  .rates-grid{margin-top:14px; display:flex; flex-direction:column; gap:12px;}
-  .rate-row{background:var(--panel-bg); border:1px solid var(--frame); border-radius:8px; padding:10px 12px;}
-  .rate-row-label{display:block; font-size:11.5px; color:var(--ink); margin-bottom:8px; font-family:'IBM Plex Mono', ui-monospace, monospace;}
-  .rate-row-label em{color:var(--muted); font-style:normal; font-size:10.5px;}
-  .rate-row-inputs{display:flex; gap:8px;}
-  .rate-row-inputs label{flex:1; font-size:9.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em;}
-  .rate-row-inputs input{
-    width:100%; margin-top:4px; background:var(--bg-page); border:1px solid var(--frame); border-radius:6px;
-    color:var(--ink); font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:13px; padding:7px 8px;
-  }
-  .rate-row-inputs input:focus-visible{outline:2px solid var(--amber); outline-offset:1px;}
-  .rates-help{font-size:11px; color:var(--muted); margin-top:10px; line-height:1.5;}
-
   .cta{
     display:block; text-align:center; background:var(--amber); color:#1B1300;
     font-family:'IBM Plex Mono', ui-monospace, monospace; font-weight:700; font-size:14px;
@@ -152,6 +133,15 @@
   .cta:hover{transform:translateY(-1px); box-shadow:0 8px 20px -8px rgba(242,169,59,.5);}
   .cta:focus-visible{outline:2px solid var(--ink); outline-offset:3px;}
   .cta-note{text-align:center; font-size:11px; color:var(--muted); margin:10px 0 0; line-height:1.5;}
+
+  .secondary-cta{
+    display:block; text-align:center; background:transparent; color:var(--amber);
+    font-family:'IBM Plex Mono', ui-monospace, monospace; font-weight:600; font-size:13px;
+    text-decoration:none; padding:12px; border:1px solid var(--amber-dim); border-radius:10px;
+    margin-top:10px; transition:background .15s ease, color .15s ease;
+  }
+  .secondary-cta:hover{background:rgba(242,169,59,.08); color:var(--ink);}
+  .secondary-cta:focus-visible{outline:2px solid var(--amber); outline-offset:2px;}
 
   .lead-form{margin-top:16px; padding-top:14px; border-top:1px dashed var(--frame);}
   .lead-form-label{display:block; font-size:11.5px; color:var(--muted); margin-bottom:8px; line-height:1.5;}
@@ -185,7 +175,7 @@
     <div class="rivet tl"></div><div class="rivet tr"></div>
 
     <header>
-      <p class="eyebrow" id="brand-name">YOUR BUSINESS NAME</p>
+      <p class="eyebrow" id="brand-name">ICONO EXCHANGE</p>
       <h1>Rate Board</h1>
       <p class="tagline">See what you'd actually receive — compared with a typical bank or transfer app.</p>
     </header>
@@ -217,36 +207,10 @@
 
     <div class="savings" id="savings" aria-live="polite">—</div>
 
-    <details class="rates-panel">
-      <summary>Set today's rates</summary>
-      <div class="rates-grid">
-        <div class="rate-row">
-          <span class="rate-row-label">USDT → EUR <em>(€ per 1 USDT)</em></span>
-          <div class="rate-row-inputs">
-            <label>Our rate<input type="number" step="0.0001" id="rate-usdt-eur-our" value="0.91"></label>
-            <label>Typical<input type="number" step="0.0001" id="rate-usdt-eur-typical" value="0.86"></label>
-          </div>
-        </div>
-        <div class="rate-row">
-          <span class="rate-row-label">NGN → EUR <em>(₦ per €1 — lower is better)</em></span>
-          <div class="rate-row-inputs">
-            <label>Our rate<input type="number" step="1" id="rate-ngn-eur-our" value="1700"></label>
-            <label>Typical<input type="number" step="1" id="rate-ngn-eur-typical" value="1820"></label>
-          </div>
-        </div>
-        <div class="rate-row">
-          <span class="rate-row-label">USDT → NGN <em>(₦ per 1 USDT)</em></span>
-          <div class="rate-row-inputs">
-            <label>Our rate<input type="number" step="1" id="rate-usdt-ngn-our" value="1680"></label>
-            <label>Typical<input type="number" step="1" id="rate-usdt-ngn-typical" value="1580"></label>
-          </div>
-        </div>
-      </div>
-      <p class="rates-help">Update these each morning so customers always see your latest numbers. This board doesn't pull a live market feed — it uses whatever you set here.</p>
-    </details>
-
     <a class="cta" id="whatsapp-cta" href="#" target="_blank" rel="noopener">Lock in this rate on WhatsApp →</a>
     <p class="cta-note">Rates can move during the day — message us to lock this one in before it changes.</p>
+
+    <a class="secondary-cta" id="google-form-cta" href="#" target="_blank" rel="noopener">Get rate alerts via Google Form</a>
 
     <form id="lead-form" class="lead-form">
       <label class="lead-form-label" for="lead-whatsapp">Just want rate alerts? Leave your WhatsApp.</label>
@@ -261,16 +225,27 @@
   </main>
 
 <script>
-  var WHATSAPP_NUMBER = '000000000000'; // TODO: replace with your real WhatsApp number, digits only, country code first (e.g. 3197... or 234...)
-  var LEAD_FORM_ENDPOINT = 'https://formspree.io/f/YOUR_FORM_ID'; // TODO: replace with your Formspree endpoint (formspree.io — free, no code needed)
+  /* ==================================================
+     EDIT YOUR BUSINESS DETAILS HERE
+     ================================================== */
+  var WHATSAPP_NUMBER = '2348071913472';
+  var GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSfmpLmwOUj1dtTy0CQbqF_-vrPpEccVduZ10wrQiGO7L7ptCQ/viewform?usp=publish-editor';
+  var LEAD_FORM_ENDPOINT = 'https://formspree.io/f/YOUR_FORM_ID';
+
+  /* ==================================================
+     EDIT TODAY'S RATES HERE (daily)
+     ================================================== */
+  var RATES = {
+    'usdt-eur': { our: 0.84, typical: 0.82 },
+    'ngn-eur': { our: 1680, typical: 1700 },
+    'usdt-ngn': { our: 1368, typical: 1340 }
+  };
 
   var corridors = {
     'usdt-eur': {
       label: 'USDT → EUR',
       sourceUnit: 'USDT',
       defaultAmount: 500,
-      ourRate: 0.91,
-      typicalRate: 0.86,
       compute: function(amt, rate){ return amt * rate; },
       formatDest: function(v){ return '€' + v.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
     },
@@ -278,8 +253,6 @@
       label: 'NGN → EUR',
       sourceUnit: '₦',
       defaultAmount: 500000,
-      ourRate: 1700,
-      typicalRate: 1820,
       compute: function(amt, rate){ return rate > 0 ? amt / rate : 0; },
       formatDest: function(v){ return '€' + v.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
     },
@@ -287,8 +260,6 @@
       label: 'USDT → NGN',
       sourceUnit: 'USDT',
       defaultAmount: 500,
-      ourRate: 1680,
-      typicalRate: 1580,
       compute: function(amt, rate){ return amt * rate; },
       formatDest: function(v){ return '₦' + Math.round(v).toLocaleString('en-US'); }
     }
@@ -302,6 +273,15 @@
   var oursValueEl = document.getElementById('ours-value');
   var savingsEl = document.getElementById('savings');
   var tabs = document.querySelectorAll('.tab');
+
+  corridors['usdt-eur'].ourRate = RATES['usdt-eur'].our;
+  corridors['usdt-eur'].typicalRate = RATES['usdt-eur'].typical;
+  corridors['ngn-eur'].ourRate = RATES['ngn-eur'].our;
+  corridors['ngn-eur'].typicalRate = RATES['ngn-eur'].typical;
+  corridors['usdt-ngn'].ourRate = RATES['usdt-ngn'].our;
+  corridors['usdt-ngn'].typicalRate = RATES['usdt-ngn'].typical;
+
+  document.getElementById('google-form-cta').href = GOOGLE_FORM_URL;
 
   function animateUpdate(el, newText){
     if (el.textContent === newText) return;
@@ -327,10 +307,10 @@
       savingsEl.innerHTML = 'You get <strong>' + c.formatDest(diff) + '</strong> more — <strong>' + pct.toFixed(1) + '%</strong> better';
       savingsEl.classList.remove('negative');
     } else if (diff < -0.004) {
-      savingsEl.innerHTML = 'Your rate is currently worse than typical — update it below';
+      savingsEl.innerHTML = 'Your rate is currently worse than typical — update it in the code';
       savingsEl.classList.add('negative');
     } else {
-      savingsEl.innerHTML = 'Rates are equal right now — update the numbers below';
+      savingsEl.innerHTML = 'Rates are equal right now — update the numbers in the code';
       savingsEl.classList.remove('negative');
     }
 
@@ -363,20 +343,6 @@
     t.addEventListener('click', function(){ switchCorridor(t.dataset.corridor); });
   });
   amountInput.addEventListener('input', update);
-
-  function wireRateInput(id, corridorKey, field){
-    var el = document.getElementById(id);
-    el.addEventListener('input', function(){
-      corridors[corridorKey][field] = parseFloat(el.value) || 0;
-      update();
-    });
-  }
-  wireRateInput('rate-usdt-eur-our', 'usdt-eur', 'ourRate');
-  wireRateInput('rate-usdt-eur-typical', 'usdt-eur', 'typicalRate');
-  wireRateInput('rate-ngn-eur-our', 'ngn-eur', 'ourRate');
-  wireRateInput('rate-ngn-eur-typical', 'ngn-eur', 'typicalRate');
-  wireRateInput('rate-usdt-ngn-our', 'usdt-ngn', 'ourRate');
-  wireRateInput('rate-usdt-ngn-typical', 'usdt-ngn', 'typicalRate');
 
   var leadForm = document.getElementById('lead-form');
   var leadStatus = document.getElementById('lead-form-status');
@@ -413,7 +379,7 @@
         throw new Error('Submission failed');
       }
     }).catch(function(){
-      leadStatus.textContent = "Couldn't save that — try WhatsApp instead.";
+      leadStatus.textContent = "Couldn't save that — try WhatsApp or Google Form instead.";
       leadStatus.classList.add('error');
     }).finally(function(){
       submitBtn.disabled = false;
