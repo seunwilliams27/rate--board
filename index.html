@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rate Board — Live Exchange Comparison</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-page:#0B0D10;
+    --board-bg:#14171C;
+    --panel-bg:#1E2229;
+    --panel-bg-2:#23272F;
+    --amber:#F2A93B;
+    --amber-dim:#B9822F;
+    --emerald:#3FA772;
+    --ink:#ECE7DC;
+    --muted:#9AA0AA;
+    --frame:#2A2E36;
+    --warn:#E0A15A;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:28px 16px;
+    background:var(--bg-page);
+    background-image:radial-gradient(circle at 50% 0%, #1A1D22, #0B0D10 60%);
+    font-family:'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+  .board{
+    position:relative;
+    width:100%;
+    max-width:440px;
+    background:var(--board-bg);
+    border-radius:18px;
+    border:1px solid var(--frame);
+    box-shadow:0 30px 60px -20px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.03);
+    padding:30px 24px 24px;
+  }
+  .rivet{position:absolute;width:8px;height:8px;border-radius:50%;background:radial-gradient(circle at 35% 35%, #4a4f58, #1c1f24);}
+  .rivet.tl{top:14px;left:14px;} .rivet.tr{top:14px;right:14px;}
+  .rivet.bl{bottom:14px;left:14px;} .rivet.br{bottom:14px;right:14px;}
+
+  .eyebrow{
+    font-family:'IBM Plex Mono', ui-monospace, monospace;
+    font-size:11px; letter-spacing:.18em; color:var(--amber);
+    text-transform:uppercase; margin:0 0 8px;
+  }
+  h1{
+    font-family:'IBM Plex Mono', ui-monospace, monospace;
+    font-weight:700; font-size:26px; letter-spacing:.02em; margin:0 0 8px;
+  }
+  .tagline{color:var(--muted); font-size:14px; line-height:1.5; margin:0 0 22px;}
+
+  .tabs{display:flex; gap:6px; margin-bottom:20px;}
+  .tab{
+    flex:1; background:var(--panel-bg); border:1px solid var(--frame); color:var(--muted);
+    font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:11.5px; padding:10px 4px;
+    border-radius:8px; cursor:pointer; transition:all .15s ease;
+  }
+  .tab.active{background:var(--amber); color:#1B1300; border-color:var(--amber); font-weight:600;}
+  .tab:focus-visible{outline:2px solid var(--amber); outline-offset:2px;}
+
+  .amount-row{margin-bottom:20px;}
+  .amount-row label{
+    display:block; font-size:11px; color:var(--muted); margin-bottom:6px;
+    font-family:'IBM Plex Mono', ui-monospace, monospace; letter-spacing:.06em; text-transform:uppercase;
+  }
+  .amount-input{
+    display:flex; align-items:center; gap:10px;
+    background:var(--panel-bg); border:1px solid var(--frame); border-radius:10px; padding:4px 14px;
+  }
+  .amount-input:focus-within{border-color:var(--amber);}
+  .amount-input input{
+    flex:1; min-width:0; background:transparent; border:0; color:var(--ink);
+    font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:22px; padding:10px 0;
+  }
+  .amount-input input:focus{outline:none;}
+  .amount-input input::-webkit-outer-spin-button,
+  .amount-input input::-webkit-inner-spin-button{-webkit-appearance:none; margin:0;}
+  .amount-input input[type=number]{-moz-appearance:textfield;}
+  .amount-input span{color:var(--muted); font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:14px;}
+
+  .readout{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;}
+  .panel{background:var(--panel-bg); border:1px solid var(--frame); border-radius:10px; padding:14px 10px; text-align:center;}
+  .panel.ours{border-color:var(--amber-dim); background:linear-gradient(180deg,var(--panel-bg-2),var(--panel-bg));}
+  .panel-label{
+    font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:10.5px; color:var(--muted);
+    text-transform:uppercase; letter-spacing:.08em; margin:0 0 8px;
+  }
+  .panel-value{
+    font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:20px; font-weight:600;
+    margin:0; color:var(--ink); transform-origin:center top;
+  }
+  .panel.ours .panel-value{color:var(--amber);}
+  .panel-value.flip{animation:flipIn .35s ease-out;}
+  @keyframes flipIn{
+    0%{transform:rotateX(90deg); opacity:0;}
+    60%{transform:rotateX(-8deg); opacity:1;}
+    100%{transform:rotateX(0deg); opacity:1;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .panel-value.flip{animation:none;}
+  }
+
+  .savings{
+    text-align:center; font-size:13.5px; color:var(--emerald);
+    background:rgba(63,167,114,.08); border:1px solid rgba(63,167,114,.25);
+    border-radius:10px; padding:12px; margin-bottom:18px; line-height:1.5;
+  }
+  .savings.negative{color:var(--warn); background:rgba(224,161,90,.08); border-color:rgba(224,161,90,.25);}
+  .savings strong{font-family:'IBM Plex Mono', ui-monospace, monospace;}
+
+  details.rates-panel{margin-bottom:18px; border-top:1px dashed var(--frame); padding-top:14px;}
+  summary{
+    cursor:pointer; font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:12.5px;
+    color:var(--muted); list-style:none;
+  }
+  summary::-webkit-details-marker{display:none;}
+  summary::marker{content:'';}
+  summary:before{content:'▸ ';}
+  details[open] summary:before{content:'▾ ';}
+  summary:focus-visible{outline:2px solid var(--amber); outline-offset:2px;}
+
+  .rates-grid{margin-top:14px; display:flex; flex-direction:column; gap:12px;}
+  .rate-row{background:var(--panel-bg); border:1px solid var(--frame); border-radius:8px; padding:10px 12px;}
+  .rate-row-label{display:block; font-size:11.5px; color:var(--ink); margin-bottom:8px; font-family:'IBM Plex Mono', ui-monospace, monospace;}
+  .rate-row-label em{color:var(--muted); font-style:normal; font-size:10.5px;}
+  .rate-row-inputs{display:flex; gap:8px;}
+  .rate-row-inputs label{flex:1; font-size:9.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em;}
+  .rate-row-inputs input{
+    width:100%; margin-top:4px; background:var(--bg-page); border:1px solid var(--frame); border-radius:6px;
+    color:var(--ink); font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:13px; padding:7px 8px;
+  }
+  .rate-row-inputs input:focus-visible{outline:2px solid var(--amber); outline-offset:1px;}
+  .rates-help{font-size:11px; color:var(--muted); margin-top:10px; line-height:1.5;}
+
+  .cta{
+    display:block; text-align:center; background:var(--amber); color:#1B1300;
+    font-family:'IBM Plex Mono', ui-monospace, monospace; font-weight:700; font-size:14px;
+    text-decoration:none; padding:15px; border-radius:10px; letter-spacing:.02em;
+    transition:transform .1s ease, box-shadow .15s ease;
+  }
+  .cta:hover{transform:translateY(-1px); box-shadow:0 8px 20px -8px rgba(242,169,59,.5);}
+  .cta:focus-visible{outline:2px solid var(--ink); outline-offset:3px;}
+  .cta-note{text-align:center; font-size:11px; color:var(--muted); margin:10px 0 0; line-height:1.5;}
+
+  .lead-form{margin-top:16px; padding-top:14px; border-top:1px dashed var(--frame);}
+  .lead-form-label{display:block; font-size:11.5px; color:var(--muted); margin-bottom:8px; line-height:1.5;}
+  .lead-form-row{display:flex; gap:8px;}
+  .lead-form-row input{
+    flex:1; min-width:0; background:var(--panel-bg); border:1px solid var(--frame); border-radius:8px;
+    color:var(--ink); font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:13px; padding:9px 10px;
+  }
+  .lead-form-row input::placeholder{color:var(--muted); opacity:.7;}
+  .lead-form-row input:focus-visible{outline:2px solid var(--amber); outline-offset:1px;}
+  .lead-form-submit{
+    background:transparent; border:1px solid var(--frame); color:var(--muted);
+    font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:12px; font-weight:600;
+    padding:9px 14px; border-radius:8px; cursor:pointer; transition:all .15s ease; white-space:nowrap;
+  }
+  .lead-form-submit:hover:not(:disabled){border-color:var(--amber-dim); color:var(--ink);}
+  .lead-form-submit:focus-visible{outline:2px solid var(--amber); outline-offset:2px;}
+  .lead-form-submit:disabled{opacity:.6; cursor:default;}
+  .lead-form-status{font-size:11px; color:var(--emerald); margin:8px 0 0; min-height:14px;}
+  .lead-form-status.error{color:var(--warn);}
+
+  @media (max-width:380px){
+    h1{font-size:22px;}
+    .panel-value{font-size:17px;}
+    .board{padding:24px 16px 18px;}
+  }
+</style>
+</head>
+<body>
+  <main class="board">
+    <div class="rivet tl"></div><div class="rivet tr"></div>
+
+    <header>
+      <p class="eyebrow" id="brand-name">YOUR BUSINESS NAME</p>
+      <h1>Rate Board</h1>
+      <p class="tagline">See what you'd actually receive — compared with a typical bank or transfer app.</p>
+    </header>
+
+    <div class="tabs" role="tablist" aria-label="Choose a currency corridor">
+      <button class="tab active" role="tab" aria-selected="true" data-corridor="usdt-eur">USDT → EUR</button>
+      <button class="tab" role="tab" aria-selected="false" data-corridor="ngn-eur">NGN → EUR</button>
+      <button class="tab" role="tab" aria-selected="false" data-corridor="usdt-ngn">USDT → NGN</button>
+    </div>
+
+    <div class="amount-row">
+      <label for="amount">Amount to send</label>
+      <div class="amount-input">
+        <input id="amount" type="number" inputmode="decimal" step="any" min="0" value="500">
+        <span id="unit-label">USDT</span>
+      </div>
+    </div>
+
+    <div class="readout">
+      <div class="panel typical">
+        <p class="panel-label">Typical provider</p>
+        <p class="panel-value" id="typical-value">—</p>
+      </div>
+      <div class="panel ours">
+        <p class="panel-label">With us</p>
+        <p class="panel-value" id="ours-value">—</p>
+      </div>
+    </div>
+
+    <div class="savings" id="savings" aria-live="polite">—</div>
+
+    <details class="rates-panel">
+      <summary>Set today's rates</summary>
+      <div class="rates-grid">
+        <div class="rate-row">
+          <span class="rate-row-label">USDT → EUR <em>(€ per 1 USDT)</em></span>
+          <div class="rate-row-inputs">
+            <label>Our rate<input type="number" step="0.0001" id="rate-usdt-eur-our" value="0.91"></label>
+            <label>Typical<input type="number" step="0.0001" id="rate-usdt-eur-typical" value="0.86"></label>
+          </div>
+        </div>
+        <div class="rate-row">
+          <span class="rate-row-label">NGN → EUR <em>(₦ per €1 — lower is better)</em></span>
+          <div class="rate-row-inputs">
+            <label>Our rate<input type="number" step="1" id="rate-ngn-eur-our" value="1700"></label>
+            <label>Typical<input type="number" step="1" id="rate-ngn-eur-typical" value="1820"></label>
+          </div>
+        </div>
+        <div class="rate-row">
+          <span class="rate-row-label">USDT → NGN <em>(₦ per 1 USDT)</em></span>
+          <div class="rate-row-inputs">
+            <label>Our rate<input type="number" step="1" id="rate-usdt-ngn-our" value="1680"></label>
+            <label>Typical<input type="number" step="1" id="rate-usdt-ngn-typical" value="1580"></label>
+          </div>
+        </div>
+      </div>
+      <p class="rates-help">Update these each morning so customers always see your latest numbers. This board doesn't pull a live market feed — it uses whatever you set here.</p>
+    </details>
+
+    <a class="cta" id="whatsapp-cta" href="#" target="_blank" rel="noopener">Lock in this rate on WhatsApp →</a>
+    <p class="cta-note">Rates can move during the day — message us to lock this one in before it changes.</p>
+
+    <form id="lead-form" class="lead-form">
+      <label class="lead-form-label" for="lead-whatsapp">Just want rate alerts? Leave your WhatsApp.</label>
+      <div class="lead-form-row">
+        <input type="tel" id="lead-whatsapp" name="whatsapp" placeholder="+234 800 000 0000" required>
+        <button type="submit" class="lead-form-submit">Send</button>
+      </div>
+      <p class="lead-form-status" id="lead-form-status" aria-live="polite"></p>
+    </form>
+
+    <div class="rivet bl"></div><div class="rivet br"></div>
+  </main>
+
+<script>
+  var WHATSAPP_NUMBER = '000000000000'; // TODO: replace with your real WhatsApp number, digits only, country code first (e.g. 3197... or 234...)
+  var LEAD_FORM_ENDPOINT = 'https://formspree.io/f/YOUR_FORM_ID'; // TODO: replace with your Formspree endpoint (formspree.io — free, no code needed)
+
+  var corridors = {
+    'usdt-eur': {
+      label: 'USDT → EUR',
+      sourceUnit: 'USDT',
+      defaultAmount: 500,
+      ourRate: 0.91,
+      typicalRate: 0.86,
+      compute: function(amt, rate){ return amt * rate; },
+      formatDest: function(v){ return '€' + v.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+    },
+    'ngn-eur': {
+      label: 'NGN → EUR',
+      sourceUnit: '₦',
+      defaultAmount: 500000,
+      ourRate: 1700,
+      typicalRate: 1820,
+      compute: function(amt, rate){ return rate > 0 ? amt / rate : 0; },
+      formatDest: function(v){ return '€' + v.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+    },
+    'usdt-ngn': {
+      label: 'USDT → NGN',
+      sourceUnit: 'USDT',
+      defaultAmount: 500,
+      ourRate: 1680,
+      typicalRate: 1580,
+      compute: function(amt, rate){ return amt * rate; },
+      formatDest: function(v){ return '₦' + Math.round(v).toLocaleString('en-US'); }
+    }
+  };
+
+  var currentCorridor = 'usdt-eur';
+
+  var amountInput = document.getElementById('amount');
+  var unitLabel = document.getElementById('unit-label');
+  var typicalValueEl = document.getElementById('typical-value');
+  var oursValueEl = document.getElementById('ours-value');
+  var savingsEl = document.getElementById('savings');
+  var tabs = document.querySelectorAll('.tab');
+
+  function animateUpdate(el, newText){
+    if (el.textContent === newText) return;
+    el.textContent = newText;
+    el.classList.remove('flip');
+    void el.offsetWidth;
+    el.classList.add('flip');
+  }
+
+  function update(){
+    var c = corridors[currentCorridor];
+    var amount = parseFloat(amountInput.value) || 0;
+    var typicalVal = c.compute(amount, c.typicalRate);
+    var oursVal = c.compute(amount, c.ourRate);
+
+    animateUpdate(typicalValueEl, c.formatDest(typicalVal));
+    animateUpdate(oursValueEl, c.formatDest(oursVal));
+
+    var diff = oursVal - typicalVal;
+    var pct = typicalVal !== 0 ? (diff / typicalVal * 100) : 0;
+
+    if (diff > 0.004) {
+      savingsEl.innerHTML = 'You get <strong>' + c.formatDest(diff) + '</strong> more — <strong>' + pct.toFixed(1) + '%</strong> better';
+      savingsEl.classList.remove('negative');
+    } else if (diff < -0.004) {
+      savingsEl.innerHTML = 'Your rate is currently worse than typical — update it below';
+      savingsEl.classList.add('negative');
+    } else {
+      savingsEl.innerHTML = 'Rates are equal right now — update the numbers below';
+      savingsEl.classList.remove('negative');
+    }
+
+    updateWhatsAppLink();
+  }
+
+  function updateWhatsAppLink(){
+    var c = corridors[currentCorridor];
+    var amount = parseFloat(amountInput.value) || 0;
+    var oursVal = c.compute(amount, c.ourRate);
+    var amountLabel = amount.toLocaleString('en-US') + ' ' + c.sourceUnit;
+    var resultLabel = c.formatDest(oursVal);
+    var msg = 'Hi! I checked the Rate Board for ' + amountLabel + ' -> ' + resultLabel + '. Can you lock in this rate for me?';
+    document.getElementById('whatsapp-cta').href = 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(msg);
+  }
+
+  function switchCorridor(key){
+    currentCorridor = key;
+    tabs.forEach(function(t){
+      var active = t.dataset.corridor === key;
+      t.classList.toggle('active', active);
+      t.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+    unitLabel.textContent = corridors[key].sourceUnit;
+    amountInput.value = corridors[key].defaultAmount;
+    update();
+  }
+
+  tabs.forEach(function(t){
+    t.addEventListener('click', function(){ switchCorridor(t.dataset.corridor); });
+  });
+  amountInput.addEventListener('input', update);
+
+  function wireRateInput(id, corridorKey, field){
+    var el = document.getElementById(id);
+    el.addEventListener('input', function(){
+      corridors[corridorKey][field] = parseFloat(el.value) || 0;
+      update();
+    });
+  }
+  wireRateInput('rate-usdt-eur-our', 'usdt-eur', 'ourRate');
+  wireRateInput('rate-usdt-eur-typical', 'usdt-eur', 'typicalRate');
+  wireRateInput('rate-ngn-eur-our', 'ngn-eur', 'ourRate');
+  wireRateInput('rate-ngn-eur-typical', 'ngn-eur', 'typicalRate');
+  wireRateInput('rate-usdt-ngn-our', 'usdt-ngn', 'ourRate');
+  wireRateInput('rate-usdt-ngn-typical', 'usdt-ngn', 'typicalRate');
+
+  var leadForm = document.getElementById('lead-form');
+  var leadStatus = document.getElementById('lead-form-status');
+  leadForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    var whatsappVal = document.getElementById('lead-whatsapp').value.trim();
+    if (!whatsappVal) return;
+
+    var c = corridors[currentCorridor];
+    var amount = parseFloat(amountInput.value) || 0;
+    var oursVal = c.compute(amount, c.ourRate);
+    var submitBtn = leadForm.querySelector('.lead-form-submit');
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending...';
+    leadStatus.textContent = '';
+    leadStatus.classList.remove('error');
+
+    var data = new FormData();
+    data.append('whatsapp', whatsappVal);
+    data.append('corridor', c.label);
+    data.append('amount', amount.toLocaleString('en-US') + ' ' + c.sourceUnit);
+    data.append('their_rate', c.formatDest(oursVal));
+
+    fetch(LEAD_FORM_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Accept': 'application/json' },
+      body: data
+    }).then(function(response){
+      if (response.ok) {
+        leadStatus.textContent = "Got it — we'll send you rate alerts.";
+        leadForm.reset();
+      } else {
+        throw new Error('Submission failed');
+      }
+    }).catch(function(){
+      leadStatus.textContent = "Couldn't save that — try WhatsApp instead.";
+      leadStatus.classList.add('error');
+    }).finally(function(){
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Send';
+    });
+  });
+
+  update();
+</script>
+</body>
+</html>
